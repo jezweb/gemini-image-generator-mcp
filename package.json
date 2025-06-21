@@ -1,0 +1,34 @@
+{
+  "name": "gemini-image-generation-mcp",
+  "version": "1.0.0",
+  "description": "MCP server for Gemini image generation using Vertex AI",
+  "main": "dist/index.js",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "dev": "tsx src/index.ts",
+    "test": "node test.js",
+    "test-single": "node test-single.js",
+    "test-multi": "node test-image.js",
+    "test-image": "npm run test-single"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.0.4",
+    "google-auth-library": "^9.14.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.5",
+    "tsx": "^4.19.2",
+    "typescript": "^5.7.3"
+  },
+  "keywords": [
+    "mcp",
+    "gemini",
+    "imagen",
+    "vertex-ai",
+    "image-generation"
+  ],
+  "author": "",
+  "license": "MIT"
+}
