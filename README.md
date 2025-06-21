@@ -9,6 +9,7 @@ A Model Context Protocol (MCP) server that enables image generation using Google
 - 🚀 Fast single-image generation optimized for MCP clients
 - 🔐 Secure authentication via Google Cloud credentials
 - 📱 Compatible with Claude Desktop, Roo Code, and other MCP clients
+- ☁️ Optional cloud storage integration (UploadThing, S3-compatible) for URL-based responses
 
 ## Prerequisites
 
@@ -55,6 +56,10 @@ Edit `.env` with your project details:
 ```env
 GOOGLE_CLOUD_PROJECT=your-project-id
 GOOGLE_APPLICATION_CREDENTIALS=/path/to/service-account-key.json  # Optional if using ADC
+
+# Optional: Cloud Storage Configuration
+STORAGE_PROVIDER=none  # Options: uploadthing, s3, none (default)
+# UPLOADTHING_TOKEN=your-uploadthing-token  # If using UploadThing
 ```
 
 ### 4. Test the Server
@@ -213,6 +218,7 @@ The repository includes several test utilities:
 - The server defaults to 1 image to optimize response size
 - Multiple images create very large responses that some clients may struggle with
 - Consider generating images one at a time for better performance
+- Alternatively, configure cloud storage to receive URLs instead of base64 data
 
 ### Debug Mode
 
@@ -246,9 +252,50 @@ MIT
 4. Add tests if applicable
 5. Submit a pull request
 
+## Cloud Storage Integration (Optional)
+
+### Overview
+
+By default, the server returns images as base64-encoded data. For better performance and smaller responses, you can configure cloud storage to upload images and return URLs instead.
+
+### UploadThing Configuration
+
+1. Create an account at [UploadThing](https://uploadthing.com)
+2. Get your API token from the dashboard
+3. Update your `.env` file:
+```env
+STORAGE_PROVIDER=uploadthing
+UPLOADTHING_TOKEN=your-uploadthing-token
+```
+
+### S3-Compatible Storage (Coming Soon)
+
+Support for S3 and S3-compatible storage (DigitalOcean Spaces, Vultr Object Storage, etc.) is planned for a future release.
+
+### Response Format
+
+With storage enabled, responses will include URLs:
+```json
+{
+  "type": "image",
+  "url": "https://utfs.io/f/your-image-id",
+  "mimeType": "image/png"
+}
+```
+
+Without storage, responses include base64 data:
+```json
+{
+  "type": "image",
+  "data": "base64...",
+  "mimeType": "image/png"
+}
+```
+
 ## Credits
 
 Built with:
 - [Model Context Protocol SDK](https://github.com/modelcontextprotocol/typescript-sdk)
 - [Google Cloud Vertex AI](https://cloud.google.com/vertex-ai)
 - [Google Auth Library](https://github.com/googleapis/google-auth-library-nodejs)
+- [UploadThing](https://uploadthing.com) (optional)

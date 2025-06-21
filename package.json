@@ -15,7 +15,8 @@
   },
   "dependencies": {
     "@modelcontextprotocol/sdk": "^1.0.4",
-    "google-auth-library": "^9.14.1"
+    "google-auth-library": "^9.14.1",
+    "uploadthing": "^7.7.2"
   },
   "devDependencies": {
     "@types/node": "^22.10.5",

@@ -6,6 +6,7 @@ import {
   ListToolsRequestSchema,
 } from "@modelcontextprotocol/sdk/types.js";
 import { GoogleAuth } from "google-auth-library";
+import { createStorageProvider, type StorageConfig, type StorageProvider } from "./storage/index.js";
 
 const projectId = process.env.GOOGLE_CLOUD_PROJECT;
 const location = "us-central1";
@@ -13,6 +14,26 @@ const location = "us-central1";
 if (!projectId) {
   console.error("Error: GOOGLE_CLOUD_PROJECT environment variable is required");
   process.exit(1);
+}
+
+// Configure storage provider
+const storageConfig: StorageConfig = {
+  provider: process.env.STORAGE_PROVIDER as 'uploadthing' | 's3' | 'none' || 'none',
+  uploadthing: process.env.UPLOADTHING_TOKEN ? {
+    token: process.env.UPLOADTHING_TOKEN
+  } : undefined,
+  s3: process.env.S3_BUCKET_NAME ? {
+    endpoint: process.env.S3_ENDPOINT || 'https://s3.amazonaws.com',
+    accessKeyId: process.env.S3_ACCESS_KEY_ID || '',
+    secretAccessKey: process.env.S3_SECRET_ACCESS_KEY || '',
+    bucket: process.env.S3_BUCKET_NAME,
+    region: process.env.S3_REGION || 'us-east-1'
+  } : undefined
+};
+
+const storageProvider = createStorageProvider(storageConfig);
+if (storageProvider) {
+  console.error(`Storage provider configured: ${storageConfig.provider}`);
 }
 
 const auth = new GoogleAuth({
@@ -170,16 +191,50 @@ class GeminiImageServer {
         throw new Error("No images generated");
       }
 
-      const images = result.predictions.map((prediction) => ({
-        type: "image" as const,
-        data: prediction.bytesBase64Encoded,
-        mimeType: prediction.mimeType || "image/png",
-      }));
+      // Process images - either upload to storage or return base64
+      const processedImages = await Promise.all(
+        result.predictions.map(async (prediction, index) => {
+          const mimeType = prediction.mimeType || "image/png";
+          const extension = mimeType.split('/')[1] || 'png';
+          const fileName = `imagen-${Date.now()}-${index}.${extension}`;
+          
+          if (storageProvider) {
+            try {
+              // Convert base64 to buffer for upload
+              const buffer = Buffer.from(prediction.bytesBase64Encoded, 'base64');
+              const uploadResult = await storageProvider.upload(buffer, fileName, mimeType);
+              
+              console.error(`Uploaded image ${index + 1} to storage: ${uploadResult.url}`);
+              
+              return {
+                type: "image" as const,
+                url: uploadResult.url,
+                mimeType: mimeType,
+              };
+            } catch (uploadError) {
+              console.error(`Failed to upload image ${index + 1}:`, uploadError);
+              // Fallback to base64 on upload failure
+              return {
+                type: "image" as const,
+                data: prediction.bytesBase64Encoded,
+                mimeType: mimeType,
+              };
+            }
+          } else {
+            // No storage provider, return base64 as before
+            return {
+              type: "image" as const,
+              data: prediction.bytesBase64Encoded,
+              mimeType: mimeType,
+            };
+          }
+        })
+      );
 
-      console.error(`Generated ${images.length} image(s) successfully`);
+      console.error(`Generated ${processedImages.length} image(s) successfully`);
       
       return {
-        content: images,
+        content: processedImages,
       };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : "Unknown error";
