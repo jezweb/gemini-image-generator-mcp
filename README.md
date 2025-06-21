@@ -292,6 +292,28 @@ Without storage, responses include base64 data:
 }
 ```
 
+## Deployment on Smithery
+
+This MCP server is compatible with [Smithery](https://smithery.ai), a platform for hosting and discovering MCP servers.
+
+### Deploy to Smithery
+
+1. Fork this repository
+2. Sign up at [smithery.ai](https://smithery.ai)
+3. Connect your GitHub account
+4. Create a new server and select this repository
+5. Smithery will automatically detect the `smithery.yaml` configuration
+
+### Smithery Configuration
+
+When deploying on Smithery, users can configure:
+- **Google Cloud Project ID** (required)
+- **Service Account Credentials** (optional - base64 encoded JSON)
+- **Storage Provider** (optional - for URL responses)
+- **UploadThing Token** (optional - if using UploadThing storage)
+
+The server includes both `smithery.yaml` and `Dockerfile` for automated deployment.
+
 ## Credits
 
 Built with:
@@ -299,3 +321,4 @@ Built with:
 - [Google Cloud Vertex AI](https://cloud.google.com/vertex-ai)
 - [Google Auth Library](https://github.com/googleapis/google-auth-library-nodejs)
 - [UploadThing](https://uploadthing.com) (optional)
+- [Smithery](https://smithery.ai) (deployment platform)

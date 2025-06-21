@@ -1,0 +1,63 @@
+# Smithery configuration file
+# Learn more at: https://smithery.ai/docs/config
+
+startCommand:
+  type: stdio
+  configSchema:
+    # JSON Schema defining the configuration options for the MCP
+    type: object
+    required:
+      - googleCloudProject
+    properties:
+      googleCloudProject:
+        type: string
+        description: Your Google Cloud project ID with Vertex AI enabled
+      googleApplicationCredentials:
+        type: string
+        description: Base64-encoded service account JSON key (optional if using ADC)
+      storageProvider:
+        type: string
+        enum: ["none", "uploadthing"]
+        default: "none"
+        description: Storage provider for image URLs (none returns base64)
+      uploadthingToken:
+        type: string
+        description: UploadThing token for image storage (if storageProvider is uploadthing)
+  commandFunction:
+    # A JS function that produces the CLI command based on the given config
+    |- 
+      (config) => {
+        const env = {
+          GOOGLE_CLOUD_PROJECT: config.googleCloudProject
+        };
+        
+        // Handle Google credentials if provided
+        if (config.googleApplicationCredentials) {
+          // Decode base64 credentials and write to temp file
+          const fs = require('fs');
+          const path = require('path');
+          const tempDir = process.env.TEMP || '/tmp';
+          const credPath = path.join(tempDir, 'google-credentials.json');
+          const decoded = Buffer.from(config.googleApplicationCredentials, 'base64').toString('utf-8');
+          fs.writeFileSync(credPath, decoded);
+          env.GOOGLE_APPLICATION_CREDENTIALS = credPath;
+        }
+        
+        // Handle storage configuration
+        if (config.storageProvider) {
+          env.STORAGE_PROVIDER = config.storageProvider;
+          if (config.storageProvider === 'uploadthing' && config.uploadthingToken) {
+            env.UPLOADTHING_TOKEN = config.uploadthingToken;
+          }
+        }
+        
+        return {
+          command: 'node',
+          args: ['dist/index.js'],
+          env: env
+        };
+      }
+  exampleConfig:
+    googleCloudProject: your-project-id
+    googleApplicationCredentials: base64-encoded-service-account-json
+    storageProvider: none

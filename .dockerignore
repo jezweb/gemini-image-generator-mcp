@@ -1,0 +1,44 @@
+# Node modules
+node_modules/
+
+# Build output (will be built in container)
+dist/
+
+# Environment files
+.env
+.env.local
+.env.production
+
+# Git files
+.git/
+.gitignore
+
+# Documentation
+README.md
+STORAGE_NOTES.md
+*.md
+
+# Test files
+test*.js
+verify-image.js
+
+# IDE files
+.vscode/
+.idea/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Credentials (should never be in image)
+*-credentials.json
+*.key
+*.pem
+service-account-key.json
+
+# GitHub workflows
+.github/

@@ -28,8 +28,14 @@
     "gemini",
     "imagen",
     "vertex-ai",
-    "image-generation"
+    "image-generation",
+    "smithery"
   ],
-  "author": "",
-  "license": "MIT"
+  "author": "jezweb",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jezweb/gemini-image-generation-mcp.git"
+  },
+  "homepage": "https://github.com/jezweb/gemini-image-generation-mcp"
 }

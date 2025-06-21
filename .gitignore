@@ -44,3 +44,7 @@ test-image.png
 .idea/
 *.swp
 *.swo
+
+# Docker files
+docker-compose.override.yml
+.dockerignore.local
